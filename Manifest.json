@@ -1,0 +1,22 @@
+{
+"name": "Emmy Sensitivity Pro X V5",
+"short_name": "Emmy Pro X",
+"description": "Free Fire sensitivity generator and HUD studio.",
+"start_url": "./index.html",
+"display": "standalone",
+"background_color": "#080b18",
+"theme_color": "#080b18",
+"orientation": "portrait",
+"icons": [
+{
+"src": "icon-192.png",
+"sizes": "192x192",
+"type": "image/png"
+},
+{
+"src": "icon-512.png",
+"sizes": "512x512",
+"type": "image/png"
+}
+]
+}
