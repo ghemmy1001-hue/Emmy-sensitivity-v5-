@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090b18">
+<title>Emmy Sensitivity Pro X V7</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="logo">EMMY<span>PRO</span></div>
+    <div class="version">V7 OFFLINE</div>
+</header>
+
+<main class="container">
+
+<section class="hero">
+    <div class="badge">⚡ ADVANCED GAMING TOOL</div>
+    <h1>EMMY SENSITIVITY<br><span>PRO X V7</span></h1>
+    <p>Your gaming settings. Your control. Your style.</p>
+</section>
+
+<section class="install-banner" id="installBanner">
+    <div class="install-glow"></div>
+    <div class="install-content">
+        <span class="install-label">⚡ YOUR GAMING COMPANION</span>
+        <h2>YOUR GAME.<br><span>YOUR CONTROL.</span></h2>
+        <p>Emmy Sensitivity Pro X V7 is ready to use offline. No internet connection required.</p>
+        <button id="installBtn" class="install-btn" disabled>
+            ✓ EMMY PRO X V7 READY
+        </button>
+        <p id="installMessage" class="install-message">
+            Offline Android application • No account required
+        </p>
+        <div class="install-features">
+            <span>✓ Offline Access</span>
+            <span>✓ Mobile Friendly</span>
+            <span>✓ Free to Use</span>
+        </div>
+    </div>
+</section>
+
+<nav class="navigation">
+    <button class="nav-btn active" data-page="generator">Generator</button>
+    <button class="nav-btn" data-page="lab">Sensi Lab</button>
+    <button class="nav-btn" data-page="profiles">Profiles</button>
+    <button class="nav-btn" data-page="hud">HUD Studio</button>
+</nav>
+
+<section class="page active" id="generator">
+    <div class="section-heading">
+        <span>01 / PERSONALIZATION</span>
+        <h2>Sensitivity Generator</h2>
+        <p>Build a starting configuration for your device.</p>
+    </div>
+
+    <div class="card">
+        <h3>📱 Device Configuration</h3>
+
+        <label for="device">Search your phone</label>
+        <input id="device" list="deviceList" placeholder="e.g. Samsung Galaxy A05">
+
+        <datalist id="deviceList">
+            <option value="Samsung Galaxy A05">
+            <option value="Samsung Galaxy A15">
+            <option value="Samsung Galaxy A25">
+            <option value="Samsung Galaxy A35">
+            <option value="Samsung Galaxy A55">
+            <option value="Tecno Spark 20">
+            <option value="Tecno Spark 20 Pro">
+            <option value="Tecno Camon 30">
+            <option value="Tecno Pova 6">
+            <option value="Infinix Hot 40">
+            <option value="Infinix Hot 50">
+            <option value="Infinix Note 40">
+            <option value="Redmi Note 13">
+            <option value="Redmi 13C">
+            <option value="iPhone 13">
+            <option value="iPhone 14">
+            <option value="iPhone 15">
+        </datalist>
+
+        <label for="ram">Device RAM</label>
+        <select id="ram">
+            <option value="2">2GB</option>
+            <option value="3">3GB</option>
+            <option value="4" selected>4GB</option>
+            <option value="6">6GB</option>
+            <option value="8">8GB</option>
+            <option value="12">12GB</option>
+            <option value="16">16GB</option>
+            <option value="24">24GB</option>
+        </select>
+
+        <label for="style">Choose playstyle</label>
+        <select id="style">
+            <option value="balanced">Balanced</option>
+            <option value="rush">Rusher</option>
+            <option value="onetap">One Tap</option>
+            <option value="sniper">Sniper</option>
+            <option value="support">Support</option>
+        </select>
+
+        <label for="performance">Device performance</label>
+        <select id="performance">
+            <option value="low">Low</option>
+            <option value="standard" selected>Standard</option>
+            <option value="high">High</option>
+        </select>
+
+        <button class="primary-btn" id="generateBtn">⚡ GENERATE SETTINGS</button>
+    </div>
+
+    <div class="card">
+        <div class="result-header">
+            <h3>Generated Results</h3>
+            <span class="live-tag">● READY</span>
+        </div>
+
+        <div id="results" class="results">
+            <p class="empty">Your generated settings will appear here.</p>
+        </div>
+
+        <button class="secondary-btn" id="copyBtn">📋 COPY SETTINGS</button>
+        <button class="secondary-btn" id="useSettingsBtn">EDIT IN SENSI LAB</button>
+    </div>
+</section>
+
+<section class="page" id="lab">
+    <div class="section-heading">
+        <span>02 / MANUAL CONTROL</span>
+        <h2>Sensi Lab</h2>
+        <p>Fine-tune your sensitivity values.</p>
+    </div>
+
+    <div class="card">
+        <div id="sliders"></div>
+        <button class="primary-btn" id="saveLabBtn">💾 SAVE SETTINGS</button>
+        <button class="secondary-btn" id="resetLabBtn">RESET VALUES</button>
+    </div>
+</section>
+
+<section class="page" id="profiles">
+    <div class="section-heading">
+        <span>03 / YOUR CONFIGURATIONS</span>
+        <h2>Saved Profiles</h2>
+        <p>Keep your favourite configurations.</p>
+    </div>
+
+    <div class="card">
+        <label for="profileName">Profile name</label>
+        <input id="profileName" placeholder="e.g. My Main Settings">
+        <button class="primary-btn" id="saveProfileBtn">SAVE CURRENT PROFILE</button>
+    </div>
+
+    <div id="profileList"></div>
+
+    <div class="card">
+        <h3>Backup Center</h3>
+        <button class="secondary-btn" id="exportBtn">📤 EXPORT BACKUP</button>
+        <label for="importFile" class="file-label">📥 IMPORT BACKUP</label>
+        <input type="file" id="importFile" accept=".json,application/json">
+    </div>
+</section>
+
+<section class="page" id="hud">
+    <div class="section-heading">
+        <span>04 / CONTROL CUSTOMIZATION</span>
+        <h2>HUD Studio</h2>
+        <p>Drag the controls to arrange your layout.</p>
+    </div>
+
+    <div class="card">
+        <div class="hud-toolbar">
+            <span>DRAG TO POSITION</span>
+            <button id="resetHudBtn" class="small-btn">RESET HUD</button>
+        </div>
+
+        <div class="hud-area" id="hudArea">
+            <div class="hud-control" data-name="Fire">FIRE</div>
+            <div class="hud-control" data-name="Jump">JUMP</div>
+            <div class="hud-control" data-name="Crouch">CROUCH</div>
+            <div class="hud-control" data-name="Scope">SCOPE</div>
+            <div class="hud-control" data-name="Joystick">MOVE</div>
+            <div class="hud-control gloo" data-name="Gloo Wall">GLOO</div>
+        </div>
+
+        <button class="primary-btn" id="saveHudBtn">💾 SAVE HUD LAYOUT</button>
+        <p class="hint">This is a visual layout planner. It does not modify the game itself.</p>
+    </div>
+</section>
+
+<section class="card tools-card">
+    <h3>🛠️ Extra Tools</h3>
+    <button class="secondary-btn" id="resetAllBtn">RESET APPLICATION DATA</button>
+    <p class="hint">Resetting removes locally saved profiles and settings.</p>
+</section>
+
+<footer>
+    <h3>EMMY PRO X V7</h3>
+    <p>Built for gamers who love control.</p>
+    <small>Independent community tool. Not affiliated with Garena.</small>
+</footer>
+
+</main>
+
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+</body>
+  </html>
