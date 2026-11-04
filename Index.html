@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#080b16">
+    <title>Emmy Sensitivity Pro X V5</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#080b18">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+</head>
+
+<body>
+
+<header class="header">
+    <div class="logo">EMMY <span>PRO X</span></div>
+    <div class="version">V6 ULTIMATE</div>
+</header>
+
+<nav class="navigation">
+    <button class="nav-btn active" data-page="home">Home</button>
+    <button class="nav-btn" data-page="generator">Generator</button>
+    <button class="nav-btn" data-page="lab">Sensi Lab</button>
+    <button class="nav-btn" data-page="hud">HUD Studio</button>
+    <button class="nav-btn" data-page="profiles">Profiles</button>
+</nav>
+
+<main>
+
+    <!-- HOME -->
+    <section class="page active" id="home">
+
+        <div class="hero">
+            <p class="eyebrow">WELCOME TO YOUR GAMING STUDIO</p>
+            <h1>EMMY <span>PRO X</span></h1>
+            <p>Create and customize your Free Fire sensitivity settings.</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <strong id="generationCount">0</strong>
+                <span>Generations</span>
+            </div>
+
+            <div class="stat-card">
+                <strong>V5</strong>
+                <span>Version</span>
+            </div>
+
+            <div class="stat-card">
+                <strong>6</strong>
+                <span>Sensitivity controls</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Gamer Profile</h2>
+
+            <label for="nickname">Nickname</label>
+            <input id="nickname" type="text" placeholder="Enter your nickname">
+
+            <label for="device">Search Your Device</label>
+<input
+    id="device"
+    type="search"
+    list="deviceSuggestions"
+    placeholder="Search phone model..."
+>
+
+<datalist id="deviceSuggestions">
+    <option value="Samsung Galaxy A05">
+    <option value="Samsung Galaxy A15">
+    <option value="Samsung Galaxy A25">
+    <option value="Tecno Spark 20">
+    <option value="Tecno Camon 30">
+    <option value="Infinix Hot 40">
+    <option value="Infinix Note 40">
+    <option value="Redmi Note 13">
+    <option value="iPhone 13">
+    <option value="iPhone 14">
+    <option value="iPhone 15">
+</datalist>
+
+<label for="ram">Device RAM</label>
+<select id="ram">
+    <option value="2">2GB RAM</option>
+    <option value="3">3GB RAM</option>
+    <option value="4" selected>4GB RAM</option>
+    <option value="6">6GB RAM</option>
+    <option value="8">8GB RAM</option>
+    <option value="12">12GB RAM</option>
+    <option value="16">16GB RAM</option>
+    <option value="24">24GB RAM</option>
+</select>
+
+            <label for="dpi">DPI (optional)</label>
+            <input id="dpi" type="number" placeholder="Enter DPI">
+
+            <button class="primary full" id="saveIdentityBtn">
+                Save Profile
+            </button>
+        </div>
+
+        <div class="card">
+            <h2>Quick Start</h2>
+            <p>Generate a sensitivity setup based on your preferred playstyle.</p>
+            <button class="primary full" data-open="generator">
+                Open Sensitivity Generator
+            </button>
+        </div>
+
+    </section>
+
+    <!-- GENERATOR -->
+    <section class="page" id="generator">
+
+        <div class="section-heading">
+            <p class="eyebrow">PERSONALIZED SETTINGS</p>
+            <h1>Sensitivity <span>Generator</span></h1>
+            <p>Choose your playstyle and device preset.</p>
+        </div>
+
+        <div class="card">
+
+            <label for="generatorStyle">Choose Playstyle</label>
+
+            <select id="generatorStyle">
+                <option value="balanced">Balanced</option>
+                <option value="rush">Rush</option>
+                <option value="one-tap">One Tap</option>
+                <option value="sniper">Sniper</option>
+                <option value="support">Support</option>
+            </select>
+
+            <label for="devicePreset">Device Performance</label>
+
+            <select id="devicePreset">
+                <option value="standard">Standard</option>
+                <option value="low">Low Performance</option>
+                <option value="mid">Medium Performance</option>
+                <option value="high">High Performance</option>
+            </select>
+
+            <button class="primary full" id="generateBtn">
+                GENERATE SENSITIVITY
+            </button>
+
+        </div>
+
+        <div class="card result-card">
+
+            <div class="result-heading">
+                <h2>Your Results</h2>
+                <span id="resultStatus">WAITING</span>
+            </div>
+
+            <div id="generatedValues" class="sensi-grid">
+                <p class="empty-message">Your settings will appear here.</p>
+            </div>
+
+            <button class="secondary full" id="copyBtn">
+                Copy Settings
+            </button>
+
+        </div>
+
+    </section>
+
+    <!-- SENSITIVITY LAB -->
+    <section class="page" id="lab">
+
+        <div class="section-heading">
+            <p class="eyebrow">MANUAL CUSTOMIZATION</p>
+            <h1>Sensi <span>Lab</span></h1>
+            <p>Adjust your sensitivity values manually.</p>
+        </div>
+
+        <div class="card">
+
+            <div class="slider-group">
+                <div class="slider-title">
+                    <label for="labGeneral">General</label>
+                    <strong id="labGeneralValue">190</strong>
+                </div>
+                <input type="range" id="labGeneral" min="0" max="200" value="190">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-title">
+                    <label for="labRed">Red Dot</label>
+                    <strong id="labRedValue">185</strong>
+                </div>
+                <input type="range" id="labRed" min="0" max="200" value="185">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-title">
+                    <label for="lab2x">2x Scope</label>
+                    <strong id="lab2xValue">180</strong>
+                </div>
+                <input type="range" id="lab2x" min="0" max="200" value="180">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-title">
+                    <label for="lab4x">4x Scope</label>
+                    <strong id="lab4xValue">170</strong>
+                </div>
+                <input type="range" id="lab4x" min="0" max="200" value="170">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-title">
+                    <label for="labSniper">Sniper Scope</label>
+                    <strong id="labSniperValue">100</strong>
+                </div>
+                <input type="range" id="labSniper" min="0" max="200" value="100">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-title">
+                    <label for="labFree">Free Look</label>
+                    <strong id="labFreeValue">150</strong>
+                </div>
+                <input type="range" id="labFree" min="0" max="200" value="150">
+            </div>
+
+            <button class="primary full" id="applyLabBtn">
+                Apply Settings
+            </button>
+
+            <button class="secondary full" id="resetLabBtn">
+                Reset Settings
+            </button>
+
+        </div>
+
+    </section>
+
+    <!-- HUD STUDIO -->
+    <section class="page" id="hud">
+
+        <div class="section-heading">
+            <p class="eyebrow">CUSTOM CONTROL LAYOUT</p>
+            <h1>HUD <span>Studio</span></h1>
+            <p>Drag the controls to customize your mockup layout.</p>
+        </div>
+
+        <div class="card">
+            <div class="hud-area" id="hudArea">
+
+                <div class="hud-control" data-name="Fire" style="left:75%;top:65%;">
+                    FIRE
+                </div>
+
+                <div class="hud-control" data-name="Jump" style="left:80%;top:35%;">
+                    JUMP
+                </div>
+
+                <div class="hud-control" data-name="Crouch" style="left:55%;top:75%;">
+                    CROUCH
+                </div>
+
+                <div class="hud-control" data-name="Scope" style="left:65%;top:20%;">
+                    SCOPE
+                </div>
+
+                <div class="hud-control" data-name="Joystick" style="left:10%;top:65%;">
+                    MOVE
+                  <div class="hud-control"
+     data-name="Gloo Wall"
+     style="left:35%;top:55%;">
+    GLOO
+                  </div>
+                </div>
+
+            </div>
+
+            <button class="primary full" id="saveHudBtn">Save HUD</button>
+            <button class="secondary full" id="resetHudBtn">Reset HUD</button>
+        </div>
+
+    </section>
+
+    <!-- PROFILES -->
+    <section class="page" id="profiles">
+
+        <div class="section-heading">
+            <p class="eyebrow">YOUR SAVED CONFIGURATIONS</p>
+            <h1>My <span>Profiles</span></h1>
+        </div>
+
+        <div class="card">
+
+            <label for="profileName">Profile Name</label>
+            <input id="profileName" type="text" placeholder="e.g. My Rush Settings">
+
+            <button class="primary full" id="saveProfileBtn">
+                Save Current Settings
+            </button>
+
+            <div id="profilesList" class="profiles-list">
+                No saved profiles yet.
+            </div>
+
+            <button class="secondary full" id="exportBtn">
+                Export Backup
+            </button>
+
+            <label for="importFile">Import Backup</label>
+            <input id="importFile" type="file" accept=".json,application/json">
+
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+    EMMY PRO X V5 · Sensitivity Studio
+    <p>Custom settings are starting points. Adjust them through gameplay.</p>
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+  <script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js")
+      .then(() => console.log("Emmy Pro X is ready offline"))
+      .catch(error => console.log("Service worker error:", error));
+  });
+}
+  </script>
+</body>
+</html>
