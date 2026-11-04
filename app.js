@@ -28,6 +28,18 @@ const DEVICE_PRESETS = {
     high: 5
 };
 
+const RAM_MODIFIERS = {
+    2: -6,
+    3: -4,
+    4: -2,
+    6: 0,
+    8: 2,
+    12: 3,
+    16: 4,
+    24: 4
+};
+
+
 const STORAGE = {
     identity: "emmy_identity",
     sensitivity: "emmy_sensitivity",
@@ -103,13 +115,12 @@ function saveIdentity() {
     const identity = {
         nickname: document.getElementById("nickname").value.trim(),
         device: document.getElementById("device").value.trim(),
+        ram: document.getElementById("ram").value,
         dpi: document.getElementById("dpi").value
     };
 
     saveData(STORAGE.identity, identity);
-
     showToast("Gamer profile saved!");
-
     updateDashboard();
 }
 
@@ -121,6 +132,9 @@ function loadIdentity() {
 
     document.getElementById("device").value =
         identity.device || "";
+
+    document.getElementById("ram").value =
+        identity.ram || "4";
 
     document.getElementById("dpi").value =
         identity.dpi || "";
@@ -149,6 +163,9 @@ function generateSensitivity() {
     const styleValues = PLAYSTYLES[style];
     const deviceModifier = DEVICE_PRESETS[device];
 
+const ram = document.getElementById("ram").value;
+const ramModifier = RAM_MODIFIERS[ram] ?? 0;
+
     if (!styleValues || deviceModifier === undefined) {
         showToast("Please select valid settings.");
         return;
@@ -159,10 +176,11 @@ function generateSensitivity() {
 
     names.forEach((name, index) => {
         result[name] = clamp(
-            DEFAULT_SENSITIVITY[name] +
-            styleValues[index] +
-            deviceModifier
-        );
+    DEFAULT_SENSITIVITY[name] +
+    styleValues[index] +
+    deviceModifier +
+    ramModifier
+);
     });
 
     currentSensitivity = { ...result };
