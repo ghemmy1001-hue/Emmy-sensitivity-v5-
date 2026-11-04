@@ -1,0 +1,38 @@
+name: Build Emmy Sensitivity Pro X V7 APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'android-v7/**'
+      - '.github/workflows/build-emmy-v7.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build APK
+        working-directory: android-v7
+        run: gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Emmy-Sensitivity-Pro-X-V7-APK
+          path: android-v7/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
