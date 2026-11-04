@@ -1,938 +1,432 @@
-"use strict";
+const $ = id => document.getElementById(id);
 
-
-/* =================================
-EMMY SENSITIVITY PRO X V6
-================================= */
-
-
-const DEFAULT_SENSITIVITY = {
-"General": 190,
-"Red Dot": 185,
-"2x Scope": 180,
-"4x Scope": 170,
-"Sniper Scope": 100,
-"Free Look": 150
+const DEFAULTS = {
+    General: 190,
+    "Red Dot": 185,
+    "2x Scope": 180,
+    "4x Scope": 170,
+    "Sniper Scope": 100,
+    "Free Look": 150
 };
 
+const KEYS = Object.keys(DEFAULTS);
+const STORAGE_KEY = "emmyProX_v6";
 
-const PLAYSTYLES = {
-balanced: [0, 0, 0, 0, 0, 0],
-rush: [8, 7, 5, 2, -5, 5],
-"one-tap": [5, 8, 5, 0, -8, 0],
-sniper: [-8, -5, -5, -8, 8, -5],
-support: [-3, -2, 0, 3, 5, 3]
-};
+let current = {...DEFAULTS};
+let generated = false;
 
-
-const DEVICE_PRESETS = {
-standard: 0,
-low: -8,
-mid: 0,
-high: 5
-};
-
-
-const RAM_MODIFIERS = {
-2: -6,
-3: -4,
-4: -2,
-6: 0,
-8: 2,
-12: 3,
-16: 4,
-24: 4
-};
-
-
-const STORAGE = {
-identity: "emmy_identity",
-sensitivity: "emmy_sensitivity",
-profiles: "emmy_profiles",
-generations: "emmy_generations",
-hud: "emmy_hud"
-};
-
-
-let currentSensitivity = { ...DEFAULT_SENSITIVITY };
-let generatedSensitivity = null;
-let toastTimer;
-
-
-/* =================================
-STORAGE HELPERS
-================================= */
-
-
-function saveData(key, value) {
-localStorage.setItem(key, JSON.stringify(value));
+function readData() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    } catch {
+        return {};
+    }
 }
 
-
-function getData(key, fallback) {
-try {
-const data = localStorage.getItem(key);
-return data ? JSON.parse(data) : fallback;
-} catch (error) {
-return fallback;
-}
+function writeData(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
+function notify(message) {
+    const toast = $("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+    clearTimeout(window.toastTimer);
+    window.toastTimer = setTimeout(() => toast.classList.remove("show"), 2300);
+}
 
 function clamp(value) {
-return Math.max(0, Math.min(200, Math.round(value)));
+    return Math.max(0, Math.min(200, Math.round(value)));
 }
 
-
-/* =================================
-NOTIFICATIONS
-================================= */
-
-
-function showToast(message) {
-const toast = document.getElementById("toast");
-
-
-if (!toast) return;
-
-toast.textContent = message;
-toast.classList.add("show");
-
-clearTimeout(toastTimer);
-
-toastTimer = setTimeout(() => {
-    toast.classList.remove("show");
-}, 2500);
-
-
-
-}
-
-
-/* =================================
-PAGE NAVIGATION
-================================= */
-
-
-function openPage(pageId) {
-document.querySelectorAll(".page").forEach(page => {
-page.classList.toggle("active", page.id === pageId);
-});
-
-
+// NAVIGATION
 document.querySelectorAll(".nav-btn").forEach(button => {
-    button.classList.toggle(
-        "active",
-        button.dataset.page === pageId
-    );
+    button.addEventListener("click", () => {
+        document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+
+        button.classList.add("active");
+        $(button.dataset.page).classList.add("active");
+    });
 });
 
+// SENSI LAB
+function renderSliders() {
+    $("sliders").innerHTML = KEYS.map(key => `
+        <div class="slider-box">
+            <div class="slider-title">
+                <span>${key}</span>
+                <strong id="value-${key}">${current[key]}</strong>
+            </div>
+            <input type="range" min="0" max="200" value="${current[key]}"
+                data-key="${key}" aria-label="${key} sensitivity">
+        </div>
+    `).join("");
 
-
+    $("sliders").querySelectorAll("input").forEach(slider => {
+        slider.addEventListener("input", () => {
+            const key = slider.dataset.key;
+            current[key] = Number(slider.value);
+            $("value-" + key).textContent = slider.value;
+        });
+    });
 }
 
-
-/* =================================
-GAMER PROFILE
-================================= */
-
-
-function saveIdentity() {
-const identity = {
-nickname: document.getElementById("nickname").value.trim(),
-device: document.getElementById("device").value.trim(),
-ram: document.getElementById("ram").value,
-dpi: document.getElementById("dpi").value
-};
-
-
-saveData(STORAGE.identity, identity);
-
-showToast("Gamer profile saved!");
-updateDashboard();
-
-
-
+function showResults(values) {
+    $("results").innerHTML = KEYS.map(key => `
+        <div class="result-item">
+            <span>${key}</span>
+            <strong>${values[key]}</strong>
+        </div>
+    `).join("");
 }
 
-
-function loadIdentity() {
-const identity = getData(STORAGE.identity, {});
-
-
-document.getElementById("nickname").value =
-    identity.nickname || "";
-
-document.getElementById("device").value =
-    identity.device || "";
-
-document.getElementById("ram").value =
-    identity.ram || "4";
-
-document.getElementById("dpi").value =
-    identity.dpi || "";
-
-
-
+function readLabValues() {
+    $("sliders").querySelectorAll("input").forEach(slider => {
+        current[slider.dataset.key] = Number(slider.value);
+    });
 }
 
+// GENERATOR
+function generateSettings() {
+    const device = $("device").value.trim();
+    const ram = Number($("ram").value);
+    const style = $("style").value;
+    const performance = $("performance").value;
 
-/* =================================
-DASHBOARD
-================================= */
+    if (!device) {
+        notify("Enter your phone model first.");
+        $("device").focus();
+        return;
+    }
 
+    const ramAdjustment = {
+        2: -7, 3: -5, 4: -3, 6: 0,
+        8: 2, 12: 3, 16: 4, 24: 4
+    };
 
-function updateDashboard() {
-const generations =
-Number(localStorage.getItem(STORAGE.generations) || 0);
+    const performanceAdjustment = {
+        low: -5,
+        standard: 0,
+        high: 4
+    };
 
+    const styleAdjustment = {
+        balanced: [0, 0, 0, 0, 0, 0],
+        rush: [5, 6, 5, 3, -3, 2],
+        onetap: [7, 8, 4, 2, -5, 0],
+        sniper: [-4, -5, -3, 4, 8, -2],
+        support: [-2, -2, -1, 0, 2, 3]
+    };
 
-const counter = document.getElementById("generationCount");
+    const adjustment =
+        ramAdjustment[ram] + performanceAdjustment[performance];
 
-if (counter) {
-    counter.textContent = generations;
+    const styleValues = styleAdjustment[style];
+
+    current = {};
+
+    KEYS.forEach((key, index) => {
+        current[key] = clamp(
+            DEFAULTS[key] + adjustment + styleValues[index]
+        );
+    });
+
+    generated = true;
+    showResults(current);
+    renderSliders();
+    notify("Settings generated for " + device + "!");
 }
 
-
-
-}
-
-
-/* =================================
-SENSITIVITY GENERATOR V6
-================================= */
-
-
-function generateSensitivity() {
-const style = document.getElementById("generatorStyle").value;
-
-
-const device = document.getElementById("devicePreset").value;
-
-const phone = document.getElementById("generatorDevice").value.trim();
-
-const ram = document.getElementById("generatorRam").value;
-
-const styleValues = PLAYSTYLES[style];
-
-const deviceModifier = DEVICE_PRESETS[device];
-
-const ramModifier = RAM_MODIFIERS[ram] ?? 0;
-
-if (!styleValues || deviceModifier === undefined) {
-    showToast("Please select valid settings.");
-    return;
-}
-
-if (!phone) {
-    showToast("Please enter your phone model.");
-    return;
-}
-
-const names = Object.keys(DEFAULT_SENSITIVITY);
-const result = {};
-
-names.forEach((name, index) => {
-    result[name] = clamp(
-        DEFAULT_SENSITIVITY[name] +
-        styleValues[index] +
-        deviceModifier +
-        ramModifier
-    );
-});
-
-currentSensitivity = { ...result };
-generatedSensitivity = { ...result };
-
-const count =
-    Number(localStorage.getItem(STORAGE.generations) || 0) + 1;
-
-localStorage.setItem(STORAGE.generations, count);
-
-document.getElementById("resultStatus").textContent = "GENERATED";
-
-displaySensitivity(result);
-
-loadLabValues(result);
-
-saveData(STORAGE.sensitivity, result);
-
-updateDashboard();
-
-showToast("Settings generated for " + phone + "!");
-
-
-
-}
-
-
-/* =================================
-DISPLAY SENSITIVITY
-================================= */
-
-
-function displaySensitivity(data) {
-const container = document.getElementById("generatedValues");
-
-
-if (!container) return;
-
-container.innerHTML = "";
-
-Object.entries(data).forEach(([name, value]) => {
-    const item = document.createElement("div");
-    item.className = "sensi-item";
-
-    const title = document.createElement("span");
-    title.textContent = name;
-
-    const number = document.createElement("strong");
-    number.textContent = value;
-
-    item.appendChild(title);
-    item.appendChild(number);
-
-    container.appendChild(item);
-});
-
-
-
-}
-
-
-/* =================================
-COPY SETTINGS
-================================= */
-
-
-async function copySettings() {
-if (!generatedSensitivity) {
-showToast("Generate settings first.");
-return;
-}
-
-
-const text = Object.entries(generatedSensitivity)
-    .map(([name, value]) => `${name}: ${value}`)
-    .join("\n");
-
-try {
-    await navigator.clipboard.writeText(text);
-    showToast("Settings copied!");
-} catch (error) {
-    const temporary = document.createElement("textarea");
-
-    temporary.value = text;
-
-    document.body.appendChild(temporary);
-    temporary.select();
-
-    const copied = document.execCommand("copy");
-
-    temporary.remove();
-
-    showToast(
-        copied ? "Settings copied!" : "Unable to copy settings."
-    );
-}
-
-
-
-}
-
-
-/* =================================
-SENSITIVITY LAB
-================================= */
-
-
-const SLIDERS = {
-"General": "labGeneral",
-"Red Dot": "labRed",
-"2x Scope": "lab2x",
-"4x Scope": "lab4x",
-"Sniper Scope": "labSniper",
-"Free Look": "labFree"
-};
-
-
-function loadLabValues(data) {
-Object.entries(SLIDERS).forEach(([name, id]) => {
-const slider = document.getElementById(id);
-
-
-    if (!slider) return;
-
-    slider.value = data[name] ?? DEFAULT_SENSITIVITY[name];
-
-    updateSlider(slider);
-});
-
-
-
-}
-
-
-function updateSlider(slider) {
-const output = document.getElementById(slider.id + "Value");
-
-
-if (output) {
-    output.textContent = slider.value;
-}
-
-
-
-}
-
-
-function getLabValues() {
-const result = {};
-
-
-Object.entries(SLIDERS).forEach(([name, id]) => {
-    const slider = document.getElementById(id);
-
-    if (slider) {
-        result[name] = clamp(Number(slider.value));
+$("generateBtn").addEventListener("click", generateSettings);
+
+$("copyBtn").addEventListener("click", async () => {
+    if (!generated) {
+        notify("Generate settings first.");
+        return;
+    }
+
+    const text = "EMMY SENSITIVITY PRO X V6\n" +
+        KEYS.map(key => `${key}: ${current[key]}`).join("\n");
+
+    try {
+        await navigator.clipboard.writeText(text);
+        notify("Settings copied!");
+    } catch {
+        const area = document.createElement("textarea");
+        area.value = text;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+        notify("Settings copied!");
     }
 });
 
-return result;
-
-
-
-}
-
-
-function applyLabSettings() {
-currentSensitivity = getLabValues();
-
-
-saveData(STORAGE.sensitivity, currentSensitivity);
-
-displaySensitivity(currentSensitivity);
-
-generatedSensitivity = { ...currentSensitivity };
-
-document.getElementById("resultStatus").textContent = "CUSTOM";
-
-showToast("Your settings have been applied!");
-
-
-
-}
-
-
-function resetLab() {
-currentSensitivity = { ...DEFAULT_SENSITIVITY };
-
-
-loadLabValues(DEFAULT_SENSITIVITY);
-
-saveData(STORAGE.sensitivity, currentSensitivity);
-
-showToast("Sensitivity reset!");
-
-
-
-}
-
-
-/* =================================
-PROFILES
-================================= */
-
-
-function saveProfile() {
-const input = document.getElementById("profileName");
-const name = input.value.trim();
-
-
-if (!name) {
-    showToast("Enter a profile name.");
-    return;
-}
-
-const profiles = getData(STORAGE.profiles, []);
-
-profiles.push({
-    id: Date.now(),
-    name: name,
-    settings: getLabValues()
+$("useSettingsBtn").addEventListener("click", () => {
+    renderSliders();
+    document.querySelector('[data-page="lab"]').click();
+    notify("Ready to edit in Sensi Lab.");
 });
 
-saveData(STORAGE.profiles, profiles);
+$("saveLabBtn").addEventListener("click", () => {
+    readLabValues();
+    const data = readData();
+    data.settings = current;
+    writeData(data);
+    showResults(current);
+    notify("Sensitivity saved!");
+});
 
-input.value = "";
+$("resetLabBtn").addEventListener("click", () => {
+    current = {...DEFAULTS};
+    generated = false;
+    renderSliders();
+    showResults(current);
+    notify("Default values restored.");
+});
 
-renderProfiles();
-
-showToast("Profile saved!");
-
-
-
-}
-
-
+// PROFILES
 function renderProfiles() {
-const container = document.getElementById("profilesList");
+    const profiles = readData().profiles || [];
 
+    if (!profiles.length) {
+        $("profileList").innerHTML =
+            '<div class="card empty">No saved profiles yet.</div>';
+        return;
+    }
 
-const profiles = getData(STORAGE.profiles, []);
+    $("profileList").innerHTML = profiles.map((profile, index) => `
+        <div class="profile-item">
+            <h4>${escapeHTML(profile.name)}</h4>
+            <p>${KEYS.map(k => `${k}: ${profile.settings[k]}`).join(" · ")}</p>
+            <button data-load="${index}">LOAD</button>
+            <button data-delete="${index}">DELETE</button>
+        </div>
+    `).join("");
 
-container.innerHTML = "";
+    $("profileList").querySelectorAll("[data-load]").forEach(button => {
+        button.addEventListener("click", () => {
+            const profile = profiles[Number(button.dataset.load)];
+            current = {...profile.settings};
+            generated = true;
+            renderSliders();
+            showResults(current);
+            notify("Profile loaded!");
+            document.querySelector('[data-page="lab"]').click();
+        });
+    });
 
-if (profiles.length === 0) {
-    container.textContent = "No saved profiles yet.";
-    return;
+    $("profileList").querySelectorAll("[data-delete]").forEach(button => {
+        button.addEventListener("click", () => {
+            const data = readData();
+            data.profiles.splice(Number(button.dataset.delete), 1);
+            writeData(data);
+            renderProfiles();
+            notify("Profile deleted.");
+        });
+    });
 }
 
-profiles.forEach(profile => {
-    const item = document.createElement("div");
-    item.className = "profile-item";
+function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[char]);
+}
 
-    const name = document.createElement("strong");
-    name.textContent = profile.name;
+$("saveProfileBtn").addEventListener("click", () => {
+    const name = $("profileName").value.trim();
 
-    const actions = document.createElement("div");
-    actions.className = "profile-actions";
+    if (!name) {
+        notify("Enter a profile name.");
+        return;
+    }
 
-    const load = document.createElement("button");
-    load.className = "secondary";
-    load.textContent = "Load";
-    load.onclick = () => loadProfile(profile.id);
+    readLabValues();
 
-    const rename = document.createElement("button");
-    rename.className = "secondary";
-    rename.textContent = "Rename";
-    rename.onclick = () => renameProfile(profile.id);
+    const data = readData();
+    data.profiles = data.profiles || [];
+    data.profiles.push({name, settings: {...current}});
+    writeData(data);
 
-    const remove = document.createElement("button");
-    remove.className = "danger";
-    remove.textContent = "Delete";
-    remove.onclick = () => deleteProfile(profile.id);
-
-    actions.append(load, rename, remove);
-
-    item.append(name, actions);
-
-    container.appendChild(item);
+    $("profileName").value = "";
+    renderProfiles();
+    notify("Profile saved!");
 });
 
+// BACKUP
+$("exportBtn").addEventListener("click", () => {
+    const backup = JSON.stringify(readData(), null, 2);
+    const blob = new Blob([backup], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
 
+    link.href = url;
+    link.download = "emmy-pro-v6-backup.json";
+    link.click();
 
-}
+    URL.revokeObjectURL(url);
+    notify("Backup exported!");
+});
 
+$("importFile").addEventListener("change", async event => {
+    const file = event.target.files[0];
+    if (!file) return;
 
-function loadProfile(id) {
-const profiles = getData(STORAGE.profiles, []);
-
-
-const profile = profiles.find(item => item.id === id);
-
-if (!profile) return;
-
-currentSensitivity = { ...profile.settings };
-generatedSensitivity = { ...profile.settings };
-
-loadLabValues(profile.settings);
-
-displaySensitivity(profile.settings);
-
-saveData(STORAGE.sensitivity, profile.settings);
-
-document.getElementById("resultStatus").textContent = "CUSTOM";
-
-showToast("Profile loaded!");
-
-
-
-}
-
-
-function renameProfile(id) {
-const profiles = getData(STORAGE.profiles, []);
-
-
-const profile = profiles.find(item => item.id === id);
-
-if (!profile) return;
-
-const newName = prompt("Enter new profile name:", profile.name);
-
-if (!newName || !newName.trim()) return;
-
-profile.name = newName.trim();
-
-saveData(STORAGE.profiles, profiles);
-
-renderProfiles();
-
-showToast("Profile renamed!");
-
-
-
-}
-
-
-function deleteProfile(id) {
-const profiles = getData(STORAGE.profiles, [])
-.filter(item => item.id !== id);
-
-
-saveData(STORAGE.profiles, profiles);
-
-renderProfiles();
-
-showToast("Profile deleted!");
-
-
-
-}
-
-
-/* =================================
-EXPORT / IMPORT
-================================= */
-
-
-function exportBackup() {
-const backup = {
-app: "Emmy Sensitivity Pro X V6",
-profiles: getData(STORAGE.profiles, []),
-sensitivity: currentSensitivity
-};
-
-
-const blob = new Blob(
-    [JSON.stringify(backup, null, 2)],
-    { type: "application/json" }
-);
-
-const url = URL.createObjectURL(blob);
-
-const link = document.createElement("a");
-
-link.href = url;
-link.download = "emmy-sensitivity-v6-backup.json";
-
-link.click();
-
-URL.revokeObjectURL(url);
-
-showToast("Backup exported!");
-
-
-
-}
-
-
-function importBackup(event) {
-const file = event.target.files[0];
-
-
-if (!file) return;
-
-const reader = new FileReader();
-
-reader.onload = () => {
     try {
-        const backup = JSON.parse(reader.result);
+        const backup = JSON.parse(await file.text());
 
-        if (!Array.isArray(backup.profiles)) {
+        if (typeof backup !== "object" || backup === null) {
             throw new Error("Invalid backup");
         }
 
-        saveData(STORAGE.profiles, backup.profiles);
-
-        if (backup.sensitivity) {
-            currentSensitivity = backup.sensitivity;
-
-            generatedSensitivity = { ...backup.sensitivity };
-
-            saveData(STORAGE.sensitivity, currentSensitivity);
-
-            loadLabValues(currentSensitivity);
-
-            displaySensitivity(currentSensitivity);
+        if (backup.settings) {
+            for (const key of KEYS) {
+                if (!Number.isFinite(backup.settings[key])) {
+                    throw new Error("Invalid settings");
+                }
+            }
         }
 
+        if (backup.profiles && !Array.isArray(backup.profiles)) {
+            throw new Error("Invalid profiles");
+        }
+
+        writeData(backup);
+        current = {...DEFAULTS, ...(backup.settings || {})};
+        renderSliders();
+        showResults(current);
         renderProfiles();
-
-        showToast("Backup imported!");
-
-    } catch (error) {
-        showToast("Invalid backup file.");
+        notify("Backup imported!");
+    } catch {
+        notify("Invalid backup file.");
     }
 
     event.target.value = "";
+});
+
+// HUD STUDIO
+const hudDefaults = {
+    Fire: [83, 70],
+    Jump: [85, 28],
+    Crouch: [64, 78],
+    Scope: [66, 22],
+    Joystick: [16, 70],
+    "Gloo Wall": [76, 48]
 };
 
-reader.readAsText(file);
-
-
-
+function saveHudPositions() {
+    const positions = {};
+    document.querySelectorAll(".hud-control").forEach(control => {
+        positions[control.dataset.name] = {
+            x: parseFloat(control.style.left),
+            y: parseFloat(control.style.top)
+        };
+    });
+    const data = readData();
+    data.hud = positions;
+    writeData(data);
 }
 
+function loadHudPositions() {
+    const saved = readData().hud || {};
 
-/* =================================
-HUD STUDIO V6
-================================= */
+    document.querySelectorAll(".hud-control").forEach(control => {
+        const name = control.dataset.name;
+        const position = saved[name] || {
+            x: hudDefaults[name][0],
+            y: hudDefaults[name][1]
+        };
 
+        control.style.left = position.x + "%";
+        control.style.top = position.y + "%";
+    });
+}
 
-function fixHudNesting() {
-const hudArea = document.getElementById("hudArea");
+function enableHudDragging() {
+    document.querySelectorAll(".hud-control").forEach(control => {
+        let dragging = false;
 
+        control.addEventListener("pointerdown", event => {
+            dragging = true;
+            control.setPointerCapture(event.pointerId);
+            event.preventDefault();
+        });
 
-if (!hudArea) return;
+        control.addEventListener("pointermove", event => {
+            if (!dragging) return;
 
-// Ensure every HUD control is a direct child of the HUD area.
-document.querySelectorAll(".hud-control").forEach(control => {
-    if (control.parentElement !== hudArea) {
-        hudArea.appendChild(control);
+            const area = $("hudArea").getBoundingClientRect();
+            const x = ((event.clientX - area.left) / area.width) * 100;
+            const y = ((event.clientY - area.top) / area.height) * 100;
+
+            control.style.left = Math.max(7, Math.min(93, x)) + "%";
+            control.style.top = Math.max(9, Math.min(91, y)) + "%";
+        });
+
+        function stopDragging() {
+            dragging = false;
+        }
+
+        control.addEventListener("pointerup", stopDragging);
+        control.addEventListener("pointercancel", stopDragging);
+    });
+}
+
+$("saveHudBtn").addEventListener("click", () => {
+    saveHudPositions();
+    notify("HUD layout saved!");
+});
+
+$("resetHudBtn").addEventListener("click", () => {
+    document.querySelectorAll(".hud-control").forEach(control => {
+        const position = hudDefaults[control.dataset.name];
+        control.style.left = position[0] + "%";
+        control.style.top = position[1] + "%";
+    });
+
+    saveHudPositions();
+    notify("HUD reset!");
+});
+
+// RESET APP
+$("resetAllBtn").addEventListener("click", () => {
+    if (!confirm("Delete all Emmy Pro V6 saved data?")) return;
+
+    localStorage.removeItem(STORAGE_KEY);
+    current = {...DEFAULTS};
+    generated = false;
+
+    renderSliders();
+    showResults(current);
+    renderProfiles();
+    loadHudPositions();
+
+    notify("Application data reset.");
+});
+
+// INITIALIZE
+function initialize() {
+    const data = readData();
+
+    current = {...DEFAULTS, ...(data.settings || {})};
+
+    renderSliders();
+    showResults(current);
+    renderProfiles();
+    loadHudPositions();
+    enableHudDragging();
+
+    if ("serviceWorker" in navigator && location.protocol !== "file:") {
+        navigator.serviceWorker.register("service-worker.js").catch(() => {});
     }
-});
-
-
-
 }
 
+initialize();
 
-function saveHUD() {
-const controls = document.querySelectorAll("#hudArea > .hud-control");
-
-
-const layout = Array.from(controls).map(control => ({
-    name: control.dataset.name,
-    left: control.style.left,
-    top: control.style.top
-}));
-
-saveData(STORAGE.hud, layout);
-
-showToast("HUD layout saved!");
-
-
-
-}
-
-
-function loadHUD() {
-const layout = getData(STORAGE.hud, []);
-
-
-layout.forEach(saved => {
-    const control = Array.from(
-        document.querySelectorAll("#hudArea > .hud-control")
-    ).find(item => item.dataset.name === saved.name);
-
-    if (!control) return;
-
-    control.style.left = saved.left;
-    control.style.top = saved.top;
-});
-
-
-
-}
-
-
-function resetHUD() {
-const controls = document.querySelectorAll("#hudArea > .hud-control");
-
-
-controls.forEach((control, index) => {
-    control.style.left = `${10 + (index % 3) * 30}%`;
-    control.style.top = `${15 + Math.floor(index / 3) * 30}%`;
-});
-
-localStorage.removeItem(STORAGE.hud);
-
-showToast("HUD layout reset!");
-
-
-
-}
-
-
-function enableHUDDragging() {
-document.querySelectorAll("#hudArea > .hud-control").forEach(control => {
-let startX = 0;
-let startY = 0;
-let originalLeft = 0;
-let originalTop = 0;
-let dragging = false;
-
-
-    control.addEventListener("pointerdown", event => {
-        const area = document.getElementById("hudArea");
-
-        const bounds = area.getBoundingClientRect();
-
-        const controlBounds = control.getBoundingClientRect();
-
-        startX = event.clientX;
-        startY = event.clientY;
-
-        originalLeft = controlBounds.left - bounds.left;
-        originalTop = controlBounds.top - bounds.top;
-
-        dragging = true;
-
-        control.setPointerCapture(event.pointerId);
-    });
-
-    control.addEventListener("pointermove", event => {
-        if (!dragging) return;
-
-        if (!control.hasPointerCapture(event.pointerId)) return;
-
-        const area = document.getElementById("hudArea");
-
-        const bounds = area.getBoundingClientRect();
-
-        const left = originalLeft + event.clientX - startX;
-
-        const top = originalTop + event.clientY - startY;
-
-        const maxLeft = bounds.width - control.offsetWidth;
-
-        const maxTop = bounds.height - control.offsetHeight;
-
-        control.style.left =
-            `${Math.max(0, Math.min(maxLeft, left))}px`;
-
-        control.style.top =
-            `${Math.max(0, Math.min(maxTop, top))}px`;
-    });
-
-    control.addEventListener("pointerup", () => {
-        dragging = false;
-    });
-
-    control.addEventListener("pointercancel", () => {
-        dragging = false;
-    });
-});
-
-
-
-}
-
-
-/* =================================
-EVENT LISTENERS
-================================= */
-
-
-function connectEvents() {
-
-
-document.querySelectorAll(".nav-btn").forEach(button => {
-    button.addEventListener("click", () => {
-        openPage(button.dataset.page);
-    });
-});
-
-document.querySelectorAll("[data-open]").forEach(button => {
-    button.addEventListener("click", () => {
-        openPage(button.dataset.open);
-    });
-});
-
-document.getElementById("saveIdentityBtn")
-    .addEventListener("click", saveIdentity);
-
-document.getElementById("generateBtn")
-    .addEventListener("click", generateSensitivity);
-
-document.getElementById("copyBtn")
-    .addEventListener("click", copySettings);
-
-document.getElementById("applyLabBtn")
-    .addEventListener("click", applyLabSettings);
-
-document.getElementById("resetLabBtn")
-    .addEventListener("click", resetLab);
-
-document.getElementById("saveProfileBtn")
-    .addEventListener("click", saveProfile);
-
-document.getElementById("exportBtn")
-    .addEventListener("click", exportBackup);
-
-document.getElementById("importFile")
-    .addEventListener("change", importBackup);
-
-document.getElementById("saveHudBtn")
-    .addEventListener("click", saveHUD);
-
-document.getElementById("resetHudBtn")
-    .addEventListener("click", resetHUD);
-
-document.querySelectorAll(".slider-group input").forEach(slider => {
-    slider.addEventListener("input", () => updateSlider(slider));
-});
-
-
-
-}
-
-
-/* =================================
-APP STARTUP
-================================= */
-
-
-function initializeApp() {
-loadIdentity();
-
-
-// Load the saved Home device and RAM into the Generator
-const identity = getData(STORAGE.identity, {});
-
-const generatorDevice = document.getElementById("generatorDevice");
-const generatorRam = document.getElementById("generatorRam");
-
-if (generatorDevice && identity.device) {
-    generatorDevice.value = identity.device;
-}
-
-if (generatorRam && identity.ram) {
-    generatorRam.value = identity.ram;
-}
-
-currentSensitivity = getData(
-    STORAGE.sensitivity,
-    { ...DEFAULT_SENSITIVITY }
-);
-
-generatedSensitivity = { ...currentSensitivity };
-
-loadLabValues(currentSensitivity);
-
-displaySensitivity(currentSensitivity);
-
-renderProfiles();
-
-fixHudNesting();
-
-loadHUD();
-
-enableHUDDragging();
-
-connectEvents();
-
-updateDashboard();
-
-console.log("Emmy Sensitivity Pro X V6 is ready!");
-
-
-
-}
-
-
-document.addEventListener("DOMContentLoaded", initializeApp);
 
 
