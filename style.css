@@ -429,6 +429,64 @@ footer small {
         height: 340px;
     }
 }
+/* V6 BUTTON AND RESULTS FIX */
+
+button.primary-btn,
+button.secondary-btn {
+    display: block !important;
+    width: 100% !important;
+    min-height: 50px;
+    padding: 14px 18px !important;
+    margin: 14px 0 !important;
+    border-radius: 10px !important;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+}
+
+button.primary-btn {
+    background: linear-gradient(110deg, #00e5ff, #9b5cff) !important;
+    color: #080b18 !important;
+    border: none !important;
+}
+
+button.secondary-btn {
+    background: #151d35 !important;
+    color: #00e5ff !important;
+    border: 1px solid #00e5ff !important;
+}
+
+.results {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.result-item {
+    background: #191e35 !important;
+    border: 1px solid #292f4d !important;
+    border-radius: 12px !important;
+    padding: 14px !important;
+}
+
+.result-item strong {
+    color: #00e5ff !important;
+}
+
+.profile-item button {
+    padding: 10px 16px;
+    border-radius: 8px;
+}
+
+@media (max-width: 380px) {
+    .results {
+        grid-template-columns: 1fr;
+    }
+}
+
+
 
 
 
