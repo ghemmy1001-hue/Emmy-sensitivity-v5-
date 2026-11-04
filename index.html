@@ -16,7 +16,7 @@
 
 <header class="header">
     <div class="logo">EMMY <span>PRO X</span></div>
-    <div class="version">V5 ULTIMATE</div>
+    <div class="version">V6 ULTIMATE</div>
 </header>
 
 <nav class="navigation">
@@ -61,8 +61,39 @@
             <label for="nickname">Nickname</label>
             <input id="nickname" type="text" placeholder="Enter your nickname">
 
-            <label for="device">Device</label>
-            <input id="device" type="text" placeholder="e.g. Samsung A05">
+            <label for="device">Search Your Device</label>
+<input
+    id="device"
+    type="search"
+    list="deviceSuggestions"
+    placeholder="Search phone model..."
+>
+
+<datalist id="deviceSuggestions">
+    <option value="Samsung Galaxy A05">
+    <option value="Samsung Galaxy A15">
+    <option value="Samsung Galaxy A25">
+    <option value="Tecno Spark 20">
+    <option value="Tecno Camon 30">
+    <option value="Infinix Hot 40">
+    <option value="Infinix Note 40">
+    <option value="Redmi Note 13">
+    <option value="iPhone 13">
+    <option value="iPhone 14">
+    <option value="iPhone 15">
+</datalist>
+
+<label for="ram">Device RAM</label>
+<select id="ram">
+    <option value="2">2GB RAM</option>
+    <option value="3">3GB RAM</option>
+    <option value="4" selected>4GB RAM</option>
+    <option value="6">6GB RAM</option>
+    <option value="8">8GB RAM</option>
+    <option value="12">12GB RAM</option>
+    <option value="16">16GB RAM</option>
+    <option value="24">24GB RAM</option>
+</select>
 
             <label for="dpi">DPI (optional)</label>
             <input id="dpi" type="number" placeholder="Enter DPI">
@@ -238,6 +269,11 @@
 
                 <div class="hud-control" data-name="Joystick" style="left:10%;top:65%;">
                     MOVE
+                  <div class="hud-control"
+     data-name="Gloo Wall"
+     style="left:35%;top:55%;">
+    GLOO
+                  </div>
                 </div>
 
             </div>
@@ -300,4 +336,4 @@ if ("serviceWorker" in navigator) {
 }
   </script>
 </body>
-</html>
+                </html>
