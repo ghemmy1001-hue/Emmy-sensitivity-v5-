@@ -1,4 +1,4 @@
-const CACHE_NAME = "emmy-pro-x-v1";
+const CACHE_NAME = "emmy-pro-x-v6";
 
 const FILES_TO_CACHE = [
 "./",
