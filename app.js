@@ -427,6 +427,58 @@ function initialize() {
 }
 
 initialize();
+// PWA INSTALLATION SYSTEM
 
+let deferredInstallPrompt = null;
 
+const installButton = $("installBtn");
+const installMessage = $("installMessage");
 
+function isAppInstalled() {
+    return window.matchMedia("(display-mode: standalone)").matches ||
+        window.navigator.standalone === true;
+}
+
+if (isAppInstalled()) {
+    installButton.textContent = "✓ APP INSTALLED";
+    installButton.disabled = true;
+    installMessage.textContent = "Emmy Pro X is already installed!";
+}
+
+window.addEventListener("beforeinstallprompt", event => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+});
+
+installButton.addEventListener("click", async () => {
+    if (isAppInstalled()) {
+        notify("Emmy Pro X is already installed!");
+        return;
+    }
+
+    if (!deferredInstallPrompt) {
+        installMessage.textContent =
+            "Open your browser menu and choose Install app or Add to Home screen.";
+        notify("Use your browser menu to install the app.");
+        return;
+    }
+
+    deferredInstallPrompt.prompt();
+
+    const choice = await deferredInstallPrompt.userChoice;
+
+    if (choice.outcome === "accepted") {
+        installMessage.textContent = "Thanks for installing Emmy Pro X!";
+    } else {
+        installMessage.textContent = "Installation was cancelled.";
+    }
+
+    deferredInstallPrompt = null;
+});
+
+window.addEventListener("appinstalled", () => {
+    installButton.textContent = "✓ APP INSTALLED";
+    installButton.disabled = true;
+    installMessage.textContent = "Welcome to Emmy Pro X!";
+    notify("Installation successful!");
+});
