@@ -429,64 +429,103 @@ footer small {
         height: 340px;
     }
 }
-/* V6 BUTTON AND RESULTS FIX */
+/* INSTALLATION LANDING PAGE */
 
-button.primary-btn,
-button.secondary-btn {
-    display: block !important;
-    width: 100% !important;
-    min-height: 50px;
-    padding: 14px 18px !important;
-    margin: 14px 0 !important;
-    border-radius: 10px !important;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
+.install-banner {
+    position: relative;
+    overflow: hidden;
+    margin: 25px 0;
+    padding: 35px 20px;
     text-align: center;
-    cursor: pointer;
+    border: 1px solid #00e5ff66;
+    border-radius: 20px;
+    background: linear-gradient(145deg, #171a38, #101c30, #251344);
+    box-shadow: 0 0 30px #00e5ff15;
 }
 
-button.primary-btn {
-    background: linear-gradient(110deg, #00e5ff, #9b5cff) !important;
-    color: #080b18 !important;
-    border: none !important;
+.install-glow {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    top: -80px;
+    right: -60px;
+    background: #9b5cff55;
+    filter: blur(65px);
+    pointer-events: none;
 }
 
-button.secondary-btn {
-    background: #151d35 !important;
-    color: #00e5ff !important;
-    border: 1px solid #00e5ff !important;
+.install-content {
+    position: relative;
+    z-index: 1;
 }
 
-.results {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+.install-label {
+    color: #00e5ff;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 2px;
 }
 
-.result-item {
-    background: #191e35 !important;
-    border: 1px solid #292f4d !important;
-    border-radius: 12px !important;
-    padding: 14px !important;
+.install-content h2 {
+    font-family: Orbitron, sans-serif;
+    font-size: clamp(23px, 6vw, 34px);
+    margin: 20px 0;
+    line-height: 1.5;
 }
 
-.result-item strong {
-    color: #00e5ff !important;
+.install-content h2 span {
+    color: #00e5ff;
 }
 
-.profile-item button {
-    padding: 10px 16px;
-    border-radius: 8px;
+.install-content > p {
+    color: #b8bfd8;
+    line-height: 1.6;
+    margin-bottom: 20px;
 }
 
-@media (max-width: 380px) {
-    .results {
-        grid-template-columns: 1fr;
+.install-btn {
+    width: 100%;
+    max-width: 330px;
+    padding: 17px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(110deg, #00e5ff, #9b5cff);
+    color: #080b18;
+    font-weight: 800;
+    font-size: 16px;
+    box-shadow: 0 0 25px #00e5ff55;
+    animation: installPulse 2s infinite;
+}
+
+.install-btn span {
+    margin-right: 8px;
+    font-size: 20px;
+}
+
+.install-btn:active {
+    transform: scale(.96);
+}
+
+@keyframes installPulse {
+    0%, 100% {
+        box-shadow: 0 0 12px #00e5ff55;
+    }
+    50% {
+        box-shadow: 0 0 30px #9b5cff99;
     }
 }
 
+.install-message {
+    font-size: 13px;
+    margin-top: 15px;
+}
 
-
-
-
+.install-features {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 22px;
+    color: #00e5ff;
+    font-size: 13px;
+    }
